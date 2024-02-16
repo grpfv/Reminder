@@ -7,113 +7,157 @@
     android:background="#EFF0EE"
     tools:context=".MainActivity">
 
+    <TextView
+        android:id="@+id/addSchedule"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="95dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="95dp"
+        android:gravity="center"
+        android:text="ADD SCHEDULE"
+        android:textColor="#113946"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
         android:id="@+id/alertTitle"
         android:layout_width="294dp"
         android:layout_height="48dp"
         android:layout_marginTop="104dp"
         android:gravity="center"
-        android:hint="TITLE"
+        android:hint="SUBJECT"
         android:textColor="#113946"
         android:textSize="15sp"
+        android:background="@drawable/rounded_corner2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/DueDate"
+        android:id="@+id/Timein"
         android:layout_width="294dp"
         android:layout_height="48dp"
-        android:layout_marginTop="36dp"
-        android:gravity="center"
-        android:hint="DUE DATE:"
+        android:layout_marginTop="13dp"
+        android:background="@drawable/rounded_corner2"
         android:focusable="false"
+        android:gravity="center"
+        android:hint="Time In"
         android:textColor="#113946"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Day" />
+
+    <EditText
+        android:id="@+id/Day"
+        android:layout_width="294dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/rounded_corner2"
+        android:gravity="center"
+        android:hint="Day"
+        android:textColor="#113946"
+        android:textSize="15sp"
+        android:clickable="true"
+        android:inputType="none"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/alertTitle" />
+
+    <EditText
+        android:id="@+id/Timeout"
+        android:layout_width="294dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="11dp"
+        android:background="@drawable/rounded_corner2"
+        android:focusable="false"
+        android:gravity="center"
+        android:hint="Time Out"
+        android:textColor="#113946"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Timein" />
+
+    <NumberPicker
+        android:id="@+id/numberPicker"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp"
+        android:layout_marginBottom="75dp"
+        app:layout_constraintBottom_toTopOf="@+id/alertbutton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.458"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/RemindMeBefore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="24dp"
         android:text="Remind Me Before"
         android:textColor="@color/black"
-        android:textSize="20sp"
+        android:textSize="17sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.118"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DueDate" />
+        app:layout_constraintTop_toBottomOf="@+id/Timeout" />
 
-    <NumberPicker
-        android:id="@+id/numberPicker"
+    <RadioGroup
+        android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="36dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.489"
+        app:layout_constraintHorizontal_bias="0.772"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/DueDate" />
+        app:layout_constraintTop_toBottomOf="@+id/RemindMeBefore">
 
-    <RadioButton
-        android:id="@+id/radioHours"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="168dp"
-        android:layout_marginBottom="240dp"
-        android:text="Hours"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/radioMinutes"
-        tools:ignore="TouchTargetSizeCheck" />
+        <RadioButton
+            android:id="@+id/radioMinutes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Minutes"
+            tools:ignore="TouchTargetSizeCheck" />
 
-    <RadioButton
-        android:id="@+id/radioMinutes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="72dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="240dp"
-        android:text="Minutes"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/radioHours"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="TouchTargetSizeCheck" />
+        <RadioButton
+            android:id="@+id/radioHours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hours"
+            tools:ignore="TouchTargetSizeCheck" />
 
-    <RadioButton
-        android:id="@+id/radioDays"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="84dp"
-        android:layout_marginBottom="96dp"
-        android:text="Days"
-        app:layout_constraintBottom_toTopOf="@+id/alertbutton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/radioHours"
-        tools:ignore="TouchTargetSizeCheck" />
-
+        <RadioButton
+            android:id="@+id/radioDays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Days"
+            tools:ignore="TouchTargetSizeCheck" />
+    </RadioGroup>
 
     <Button
         android:id="@+id/alertbutton"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
         android:background="@drawable/buttonbg"
         android:fontFamily="sans-serif"
         android:gravity="center"
-        android:text="SET REMINDER"
+        android:text="ADD SCHEDULE"
         android:textColor="#FFF2D8"
         android:textSize="15sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioHours"
-        tools:ignore="TouchTargetSizeCheck" />
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

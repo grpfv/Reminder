@@ -1,7 +1,6 @@
 package com.example.notification;
 
 import android.app.AlarmManager;
-import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -14,25 +13,28 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TimePicker;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText alertTitle, DueDate;
+    private EditText alertTitle, Timein, Timeout, Day;
     private NumberPicker numberPicker;
     private RadioGroup radioGroup;
     private RadioButton radioMinutes, radioDays, radioHours;
     private Button alertButton;
     private Calendar calendar;
+
+    public static final String CHANNEL_ID = "default";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +44,11 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel();
 
         alertTitle = findViewById(R.id.alertTitle);
-        DueDate = findViewById(R.id.DueDate);
+        Timein = findViewById(R.id.Timein);
+        Timeout = findViewById(R.id.Timeout);
+        Day = findViewById(R.id.Day);
         numberPicker = findViewById(R.id.numberPicker);
+        radioGroup = findViewById(R.id.radioGroup);
         radioMinutes = findViewById(R.id.radioMinutes);
         radioDays = findViewById(R.id.radioDays);
         radioHours = findViewById(R.id.radioHours);
@@ -56,28 +61,40 @@ public class MainActivity extends AppCompatActivity {
         numberPicker.setMinValue(1);
         numberPicker.setMaxValue(60);
 
-        // Set up Date picker dialog
-        DueDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
 
+        // Set up "ADD SCHEDULE" button click listener
         alertButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setReminder();
             }
         });
+
+        // Set up Time picker dialog for Timein EditText
+        Timein.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog(Timein);
+            }
+        });
+
+        // Set up Time picker dialog for Timeout EditText
+        Timeout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog(Timeout);
+            }
+        });
+
+
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Default Channel";
-            String description = "This is the default channel";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("default", name, importance);
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -85,27 +102,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showDatePickerDialog() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        calendar.set(Calendar.YEAR, year);
-                        calendar.set(Calendar.MONTH, month);
-                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                        showTimePickerDialog();
-                    }
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
-    }
-
-    private void showTimePickerDialog() {
+    private void showTimePickerDialog(final EditText editText) {
         TimePickerDialog timePickerDialog = new TimePickerDialog(
                 this,
                 new TimePickerDialog.OnTimeSetListener() {
@@ -114,8 +111,15 @@ public class MainActivity extends AppCompatActivity {
                         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                         calendar.set(Calendar.MINUTE, minute);
 
-                        // Update DueDate EditText with selected date and time
-                        updateDueDateEditText();
+                        // Format the selected time
+                        String formattedTime = String.format("%02d:%02d %s", hourOfDay % 12 == 0 ? 12 : hourOfDay % 12, minute, hourOfDay < 12 ? "AM" : "PM");
+
+                        // Set the formatted time to the EditText
+                        editText.setText(formattedTime);
+
+                        // Update the calendar object with the selected time
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calendar.set(Calendar.MINUTE, minute);
                     }
                 },
                 calendar.get(Calendar.HOUR_OF_DAY),
@@ -125,21 +129,21 @@ public class MainActivity extends AppCompatActivity {
         timePickerDialog.show();
     }
 
-    private void updateDueDateEditText() {
-        // Format the selected date and time
-        String formattedDate = android.text.format.DateFormat.format("dd-MM-yyyy hh:mm a", calendar).toString();
-        // Set the formatted date and time to the DueDate EditText
-        DueDate.setText(formattedDate);
-    }
-
     private void setReminder() {
         String title = alertTitle.getText().toString();
-        // Get the selected date and time from the calendar
-        long dueDateTimeMillis = calendar.getTimeInMillis();
-        // Get reminder interval value from number picker
+        String selectedDay = Day.getText().toString();
+        String timeIn = Timein.getText().toString();
+
+        // Check for empty fields
+        if (title.isEmpty() || selectedDay.isEmpty() || timeIn.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         int reminderInterval = numberPicker.getValue();
-        // Get the selected time unit for the reminder interval
         String timeUnit = "";
+
+        // Determine the selected time unit
         if (radioMinutes.isChecked()) {
             timeUnit = "minutes";
         } else if (radioDays.isChecked()) {
@@ -148,51 +152,88 @@ public class MainActivity extends AppCompatActivity {
             timeUnit = "hours";
         }
 
-        // Subtract reminder interval from due date/time
-        long reminderTimeMillis = dueDateTimeMillis - getMillisecondsForTimeUnit(reminderInterval, timeUnit);
+        // Convert reminder interval to milliseconds
+        long reminderIntervalMillis = getMillisecondsForTimeUnit(reminderInterval, timeUnit);
 
-        // Check if reminder time is in the past
-        if (reminderTimeMillis <= System.currentTimeMillis()) {
-            // If it's in the past, set it to the current time + reminder interval
-            reminderTimeMillis = System.currentTimeMillis() + getMillisecondsForTimeUnit(reminderInterval, timeUnit);
+        // Calculate alarm time based on selected day, time in, and reminder interval
+        Calendar alarmTime = Calendar.getInstance();
+        alarmTime.setTime(calendar.getTime());
+
+        // Set the alarm time to the selected time in EditText
+        int hourOfDay = Integer.parseInt(timeIn.substring(0, 2));
+        int minute = Integer.parseInt(timeIn.substring(3, 5));
+        alarmTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        alarmTime.set(Calendar.MINUTE, minute);
+        alarmTime.set(Calendar.SECOND, 0);
+
+        // Adjust alarm time based on reminder interval
+        switch (timeUnit) {
+            case "minutes":
+                alarmTime.add(Calendar.MINUTE, -reminderInterval);
+                break;
+            case "hours":
+                alarmTime.add(Calendar.HOUR_OF_DAY, -reminderInterval);
+                break;
+            case "days":
+                alarmTime.add(Calendar.DAY_OF_MONTH, -reminderInterval);
+                break;
         }
 
+        // Set the alarm for the specified day
+        int selectedDayOfWeek = getDayOfWeek(selectedDay);
+        int currentDayOfWeek = alarmTime.get(Calendar.DAY_OF_WEEK);
+        if (selectedDayOfWeek != -1) {
+            // Adjust the alarm time if necessary to match the selected day
+            int daysToAdd = (selectedDayOfWeek - currentDayOfWeek + 7) % 7;
+            alarmTime.add(Calendar.DAY_OF_WEEK, daysToAdd);
+        }
 
-        // Create notification intent
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+        // Create the intent for the notification
+        Intent notificationIntent = new Intent(this, AlarmReceiver.class);
+        notificationIntent.putExtra("title", "You have class in " + title);
+        PendingIntent contentIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // Set sound and vibration for the notification
-        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        long[] pattern = {0, 1000, 1000}; // Vibrate pattern: vibrate for 1 second, pause for 1 second, vibrate for 1 second
+        // Set the alarm for the reminder time
+        setAlarm(alarmTime.getTimeInMillis(), contentIntent);
 
-        // Build notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
-                .setSmallIcon(R.drawable.notif) // Replace "notif.png" with the actual name of your icon
-                .setContentTitle("Reminder: " + title)
-                .setContentText("Due Date: " + DueDate.getText().toString())
-                .setAutoCancel(true)
-                .setSound(soundUri)
-                .setVibrate(pattern)
-                .setContentIntent(contentIntent);
+        // Notify the user about when the alarm will be displayed
+        Toast.makeText(this, "Alarm in:" + alarmTime.getTime(), Toast.LENGTH_SHORT).show();
 
-        /// Show notification
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, builder.build());
-
-        // Set the alarm
-        setAlarm(reminderTimeMillis, title);
-
-        Toast.makeText(this, "Reminder set for " + reminderInterval + " " + timeUnit + " before " + DueDate.getText().toString(), Toast.LENGTH_SHORT).show();
+        // Create an intent to start the SchedList activity
+        Intent intent = new Intent(MainActivity.this, SchedList.class);
+        // Pass the selected day and time to the SchedList activity
+        intent.putExtra("selectedDay", selectedDay);
+        intent.putExtra("timeIn", timeIn);
+        // Start the SchedList activity
+        startActivity(intent);
     }
 
-    private void setAlarm(long alarmTimeMillis, String title) {
+    private int getDayOfWeek(String selectedDay) {
+        switch (selectedDay.toLowerCase()) {
+            case "monday":
+                return Calendar.MONDAY;
+            case "tuesday":
+                return Calendar.TUESDAY;
+            case "wednesday":
+                return Calendar.WEDNESDAY;
+            case "thursday":
+                return Calendar.THURSDAY;
+            case "friday":
+                return Calendar.FRIDAY;
+            case "saturday":
+                return Calendar.SATURDAY;
+            case "sunday":
+                return Calendar.SUNDAY;
+            default:
+                return -1;
+        }
+    }
+
+    private void setAlarm(long alarmTimeMillis, PendingIntent contentIntent) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent alarmIntent = new Intent(this, AlarmReceiver.class);
-        alarmIntent.putExtra("title", title);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmTimeMillis, pendingIntent);
+
+        // Set the alarm to trigger at the reminder time
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTimeMillis, contentIntent);
     }
 
     private long getMillisecondsForTimeUnit(int interval, String timeUnit) {
